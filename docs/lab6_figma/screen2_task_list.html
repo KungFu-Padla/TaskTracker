@@ -9,16 +9,19 @@
   body { font-family: 'Inter', 'Roboto', 'Segoe UI', sans-serif; background: #f3f4f6; color: #111827; }
   .navbar { background: #fff; border-bottom: 1px solid #e5e7eb; padding: 12px 16px; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 10; }
   .navbar h1 { font-size: 18px; font-weight: 600; }
-  .btn-add { background: #3b82f6; color: #fff; border: none; padding: 8px 14px; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 6px; }
+  .nav-right { display: flex; gap: 8px; align-items: center; }
+  .btn-add { background: #3b82f6; color: #fff; border: none; padding: 8px 14px; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 6px; text-decoration: none; }
   .btn-add:hover { background: #2563eb; }
+  .btn-logout { background: #f3f4f6; color: #4b5563; border: none; padding: 8px 12px; border-radius: 8px; font-size: 14px; cursor: pointer; text-decoration: none; }
+  .btn-logout:hover { background: #e5e7eb; }
   .filters { display: flex; gap: 8px; padding: 12px 16px; background: #fff; border-bottom: 1px solid #e5e7eb; }
   .filter-btn { padding: 6px 12px; border: 1px solid #d1d5db; background: #fff; border-radius: 20px; font-size: 14px; cursor: pointer; color: #374151; }
   .filter-btn.active { background: #3b82f6; color: #fff; border-color: #3b82f6; }
-  .content { padding: 16px; }
+  .content { padding: 16px; max-width: 700px; margin: 0 auto; }
   .empty { text-align: center; padding: 60px 20px; color: #6b7280; }
-  .empty svg { width: 80px; height: 80px; opacity: 0.4; margin-bottom: 16px; }
   .tasks { display: flex; flex-direction: column; gap: 12px; }
-  .task-card { background: #fff; border: 1px solid #e5e7eb; border-radius: 12px; padding: 16px; display: flex; align-items: center; gap: 12px; }
+  .task-card { background: #fff; border: 1px solid #e5e7eb; border-radius: 12px; padding: 16px; display: flex; align-items: center; gap: 12px; cursor: pointer; transition: box-shadow 0.15s; }
+  .task-card:hover { box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
   .task-card.done .title { text-decoration: line-through; color: #9ca3af; }
   .checkbox { width: 20px; height: 20px; border: 2px solid #d1d5db; border-radius: 6px; cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
   .checkbox.checked { background: #10b981; border-color: #10b981; }
@@ -32,47 +35,88 @@
   .btn-delete { background: #fef2f2; color: #ef4444; }
   .btn-edit:hover { background: #dbeafe; }
   .btn-delete:hover { background: #fee2e2; }
-  .fab { position: fixed; bottom: 24px; right: 24px; width: 56px; height: 56px; background: #3b82f6; color: #fff; border: none; border-radius: 50%; font-size: 24px; cursor: pointer; box-shadow: 0 4px 6px rgba(59,130,246,0.3); }
-  .fab:hover { background: #2563eb; }
 </style>
 </head>
 <body>
   <nav class="navbar">
     <h1>Мои задачи</h1>
-    <button class="btn-add">+ Добавить задачу</button>
+    <div class="nav-right">
+      <a href="/new" class="btn-add">+ Добавить задачу</a>
+      <a href="/" class="btn-logout">Выйти</a>
+    </div>
   </nav>
   <div class="filters">
-    <button class="filter-btn active">Все</button>
-    <button class="filter-btn">Активные</button>
-    <button class="filter-btn">Выполненные</button>
+    <button class="filter-btn active" data-filter="all">Все</button>
+    <button class="filter-btn" data-filter="active">Активные</button>
+    <button class="filter-btn" data-filter="done">Выполненные</button>
   </div>
   <div class="content">
-    <div class="tasks">
-      <!-- Пример задачи -->
-      <div class="task-card">
-        <div class="checkbox"></div>
-        <div class="info">
-          <div class="title">Купить продукты</div>
-          <div class="date">Создано: 20.11.2026</div>
-        </div>
-        <div class="actions">
-          <button class="btn-icon btn-edit">✏</button>
-          <button class="btn-icon btn-delete">🗑</button>
-        </div>
-      </div>
-      <div class="task-card done">
-        <div class="checkbox checked"></div>
-        <div class="info">
-          <div class="title">Позвонить маме</div>
-          <div class="date">Создано: 19.11.2026</div>
-        </div>
-        <div class="actions">
-          <button class="btn-icon btn-edit">✏</button>
-          <button class="btn-icon btn-delete">🗑</button>
-        </div>
-      </div>
+    <div class="tasks" id="task-list">
+      <div class="empty">Загрузка...</div>
     </div>
   </div>
-  <button class="fab">+</button>
+  <script>
+    let currentFilter = 'all';
+    let allTasks = [];
+
+    async function loadTasks() {
+      const resp = await fetch('/tasks');
+      allTasks = await resp.json();
+      render();
+    }
+
+    function render() {
+      const list = document.getElementById('task-list');
+      let filtered = allTasks;
+      if (currentFilter === 'active') filtered = allTasks.filter(t => !t.done);
+      if (currentFilter === 'done') filtered = allTasks.filter(t => t.done);
+
+      if (!filtered.length) {
+        list.innerHTML = '<div class="empty">Задач пока нет. Создайте первую!</div>';
+        return;
+      }
+      list.innerHTML = filtered.map(t => `
+        <div class="task-card ${t.done ? 'done' : ''}" onclick="openTask(${t.id})">
+          <div class="checkbox ${t.done ? 'checked' : ''}" onclick="event.stopPropagation(); toggleTask(${t.id}, ${t.done})"></div>
+          <div class="info">
+            <div class="title">${t.title}</div>
+            <div class="date">ID: ${t.id}</div>
+          </div>
+          <div class="actions">
+            <button class="btn-icon btn-edit" onclick="event.stopPropagation(); editTask(${t.id})">✏</button>
+            <button class="btn-icon btn-delete" onclick="event.stopPropagation(); deleteTask(${t.id})">🗑</button>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function openTask(id) { window.location.href = '/task/' + id; }
+    function editTask(id) { window.location.href = '/new?edit=' + id; }
+
+    async function toggleTask(id, isDone) {
+      if (!isDone) {
+        await fetch(`/tasks/${id}/complete`, { method: 'POST' });
+      }
+      loadTasks();
+    }
+
+    async function deleteTask(id) {
+      if (confirm('Удалить задачу?')) {
+        await fetch(`/tasks/${id}`, { method: 'DELETE' });
+        loadTasks();
+      }
+    }
+
+    document.querySelectorAll('.filter-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        currentFilter = btn.dataset.filter;
+        render();
+      });
+    });
+
+    loadTasks();
+  </script>
 </body>
 </html>
