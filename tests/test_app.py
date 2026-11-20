@@ -3,9 +3,15 @@
 Проверяют создание и завершение задачи через тестовый клиент Flask.
 """
 
+import sys
+from pathlib import Path
+
+# Добавляем корень проекта в начало sys.path, чтобы импорт app находил app.py проекта,
+
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+
 import pytest
 from app import app
-
 
 @pytest.fixture
 def client():
