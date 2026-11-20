@@ -17,7 +17,7 @@ TaskTracker позволяет пользователю:
 - Интерфейс: Figma (макеты)
 - Установщик: Inno Setup / Setup Creator
 
-## Структура репозитория
+## Структура repository
 ```
 TaskTracker/
 ├── .github/workflows/ci.yml      # GitHub Actions (ЛР 3, 7)
