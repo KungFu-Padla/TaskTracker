@@ -1,0 +1,35 @@
+@startuml
+autonumber
+actor User as "Пользователь"
+boundary UI as "Веб-интерфейс (Flask)"
+control Controller as "Контроллер задач"
+database DB as "Хранилище задач (в прототипе — список в памяти)"
+
+User -> UI: открыть страницу задач
+UI -> Controller: GET /tasks
+Controller -> DB: прочитать все задачи
+DB --> Controller: список задач
+Controller --> UI: JSON-список
+UI --> User: отобразить задачи
+
+User -> UI: ввести название и нажать "Создать"
+UI -> Controller: POST /tasks {title}
+Controller -> DB: добавить задачу
+DB --> Controller: новая задача с id
+Controller --> UI: созданная задача (201)
+UI --> User: задача появилась в списке
+
+User -> UI: нажать "Завершить" у задачи N
+UI -> Controller: POST /tasks/N/complete
+Controller -> DB: установить done = true для N
+DB --> Controller: обновлённая задача
+Controller --> UI: OK
+UI --> User: задача помечена выполненной
+
+User -> UI: нажать "Удалить" у задачи N
+UI -> Controller: DELETE /tasks/N
+Controller -> DB: удалить задачу N
+DB --> Controller: подтверждение
+Controller --> UI: OK
+UI --> User: задача удалена из списка
+@enduml

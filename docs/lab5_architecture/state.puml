@@ -1,0 +1,13 @@
+@startuml
+state "Новая" as New
+state "Активная" as Active
+state "Выполнена" as Done
+state "Удалена" as Deleted
+
+[*] --> New
+New --> Active : создать задачу
+Active --> Done : пометить выполненной
+Done --> Active : вернуть в активные
+Active --> Deleted : удалить задачу
+Deleted --> [*]
+@enduml

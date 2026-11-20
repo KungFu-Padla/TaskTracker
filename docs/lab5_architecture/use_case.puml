@@ -1,0 +1,21 @@
+@startuml
+left to right direction
+actor User as "Пользователь"
+rectangle "Система TaskTracker" as System {
+  usecase "UC1: Регистрация / вход" as UC1
+  usecase "UC2: Создать задачу" as UC2
+  usecase "UC3: Просмотреть список задач" as UC3
+  usecase "UC4: Редактировать задачу" as UC4
+  usecase "UC5: Удалить задачу" as UC5
+  usecase "UC6: Пометить задачу выполненной" as UC6
+  usecase "UC7: Фильтровать по статусу" as UC7
+}
+
+User --> UC1
+User --> UC2
+User --> UC3
+User --> UC4
+User --> UC5
+User --> UC6
+User --> UC7
+@enduml

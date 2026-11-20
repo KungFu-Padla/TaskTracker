@@ -1,0 +1,41 @@
+@startuml
+class Task {
+  - id: int
+  - title: string
+  - done: boolean
+  - created_at: datetime
+  + mark_done()
+  + edit_title(newTitle: string)
+}
+
+class TaskController {
+  + list_tasks(): list<Task>
+  + create_task(title: string): Task
+  + complete_task(id: int): Task
+  + delete_task(id: int): void
+}
+
+class TaskRepository {
+  - tasks: list<Task>
+  - next_id: int
+  + add(task: Task)
+  + find_by_id(id: int): Task
+  + remove(id: int): void
+}
+
+class UserInterface {
+  + render(tasks: list<Task>)
+  + on_create(title: string)
+  + on_complete(id: int)
+  + on_delete(id: int)
+}
+
+class FlaskApp {
+  + run()
+}
+
+TaskController "1" o-- "*" Task : управляет
+TaskController "1" -- "1" TaskRepository : использует
+UserInterface "1" -- "1" TaskController : вызывает
+FlaskApp "1" o-- "1" TaskController : запускает
+@enduml

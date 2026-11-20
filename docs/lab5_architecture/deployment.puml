@@ -1,0 +1,26 @@
+@startuml
+node "Браузер пользователя" as Browser {
+  component "Веб-интерфейс (HTML/JS)"
+}
+
+node "Сервер приложений (Flask, Python)" as Server {
+  component "TaskTracker API (app.py)"
+  component "Хранилище задач (в памяти / БД)"
+}
+
+node "GitHub" as GH {
+  component "Репозиторий TaskTracker"
+  component "GitHub Actions (CI)"
+  component "Wiki (документация)"
+}
+
+node "ПК разработчика" as Dev {
+  component "IDE (VS Code / PyCharm)"
+  component "Git"
+}
+
+Dev --> GH: пуш кода, PR, слияние
+GH --> Server: развёртывание (в проде — сервер)
+Server --> Browser: отдача веб-интерфейса и API
+Browser --> Server: HTTP-запросы (задачи)
+@enduml
