@@ -3,6 +3,11 @@
 Проверяют создание и завершение задачи через тестовый клиент Flask.
 """
 
+import sys
+from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+
 import pytest
 from app import app
 
